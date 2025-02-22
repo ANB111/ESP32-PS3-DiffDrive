@@ -1,0 +1,4 @@
+#define MAC_ESP1 "C8:F0:9E:4F:30:FC"
+#define MAC_ESP2 "C8:F0:9E:4F:40:9C"
+#define MAC_ESP3 "CC:DB:A7:13:CC:5A"
+#define MAC_ESP4 "5C:01:3B:89:82:EA"
