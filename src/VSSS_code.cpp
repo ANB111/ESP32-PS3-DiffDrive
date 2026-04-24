@@ -7,23 +7,23 @@
 #include <cstdlib>
 #include <stdint.h>
 
-#define MAC MAC_ESP4
+#define MAC AZUL
 
 #define AIN1 26
 #define AIN2 25 
 #define PWMA 33
 
 #define BIN1 14
-#define BIN2 12
+#define BIN2 17
 #define PWMB 32
 
 #define STBY 27
 #define LED_PIN 2
 
-#define ENC_MOTOR_LEFT_A 39  // Encoder motor izquierdo A C2_M2
-#define ENC_MOTOR_LEFT_B 34 // Encoder motor izquierdo B C1_M2
-#define ENC_MOTOR_RIGHT_A 11// Encoder motor derecho A C2_M1
-#define ENC_MOTOR_RIGHT_B 10// Encoder motor derecho B C1_M1
+#define ENC_MOTOR_LEFT_A 5  // Encoder motor izquierdo A C2_M2
+#define ENC_MOTOR_LEFT_B 18 // Encoder motor izquierdo B C1_M2
+#define ENC_MOTOR_RIGHT_A 13// Encoder motor derecho A C2_M1
+#define ENC_MOTOR_RIGHT_B 16// Encoder motor derecho B C1_M1
 
 #define PWMA_CHANNEL 0
 #define PWMB_CHANNEL 1
