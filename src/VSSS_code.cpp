@@ -10,7 +10,7 @@
 #define MAC AZUL
 
 #define AIN1 26
-#define AIN2 25 
+#define AIN2 25
 #define PWMA 33
 
 #define BIN1 14
@@ -37,6 +37,15 @@ float leftRPM = 0;
 float rightRPM = 0;
 int PULSES_PER_REV = 60;
 const int DEADZONE = 10;
+const float STEERING_GAIN = 0.8f;
+
+int applyDeadzone(int value) {
+    return (abs(value) > DEADZONE) ? value : 0;
+}
+
+int scaleJoystick(int value) {
+    return constrain(value * 2, -255, 255);
+}
 
 void IRAM_ATTR countLeftPulses() {
     leftPulses += (digitalRead(ENC_MOTOR_LEFT_A) > digitalRead(ENC_MOTOR_LEFT_B)) ? 1 : -1;
@@ -71,7 +80,7 @@ void moveEngine(bool forward, int speed, int num_motor)
         digitalWrite(AIN1, !forward);
         digitalWrite(AIN2, forward);
         ledcWrite(PWMA_CHANNEL, speed);
-    } 
+    }
     else if (num_motor == 2) { // Motor derecho (invertimos la lógica)
         digitalWrite(BIN1, forward);   // <- Cambiamos !forward por forward
         digitalWrite(BIN2, !forward);  // <- Cambiamos forward por !forward
@@ -82,13 +91,31 @@ void moveEngine(bool forward, int speed, int num_motor)
 void dataReceiver() {
     if (Ps3.isConnected()) {
         ControllerData data = getControllerData();
-        leftWheel = abs(data.ly) > DEADZONE ? data.ly : 0;
-        rightWheel = abs(data.ry) > DEADZONE ? data.ry : 0;
-
-        // Debug messages to print joystick data
-        Serial.print("Joystick Left: "); Serial.println(leftWheel);
-        Serial.print("Joystick Right: "); Serial.println(rightWheel);
+        leftWheel = applyDeadzone(data.ly);
+        rightWheel = applyDeadzone(data.rx);
     }
+}
+
+void driveDifferential() {
+    int throttle = scaleJoystick(leftWheel);
+    int steering = scaleJoystick(rightWheel) * STEERING_GAIN;
+
+    int leftMotor = constrain(throttle + steering, -255, 255);
+    int rightMotor = constrain(throttle - steering, -255, 255);
+
+    if (leftMotor > 0)
+        moveEngine(1, leftMotor, 1);
+    else if (leftMotor < 0)
+        moveEngine(0, abs(leftMotor), 1);
+    else
+        moveEngine(0, 0, 1);
+
+    if (rightMotor > 0)
+        moveEngine(1, rightMotor, 2);
+    else if (rightMotor < 0)
+        moveEngine(0, abs(rightMotor), 2);
+    else
+        moveEngine(0, 0, 2);
 }
 
 void setup() {
@@ -126,20 +153,7 @@ void setup() {
 
 void loop() {
     dataReceiver();
-
-    if (leftWheel > 0)
-        moveEngine(1, leftWheel * 2, 1);
-    else if (leftWheel < 0)
-        moveEngine(0, abs(leftWheel) * 2, 1);
-    else
-        moveEngine(0, 0, 1);
-
-    if (rightWheel > 0)
-        moveEngine(1, rightWheel * 2, 2);
-    else if (rightWheel < 0)
-        moveEngine(0, abs(rightWheel) * 2, 2);
-    else
-        moveEngine(0, 0, 2);
+    driveDifferential();
 
     calculateRPM();
 }
